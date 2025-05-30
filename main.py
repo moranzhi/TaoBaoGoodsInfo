@@ -1,50 +1,76 @@
-import re
 import requests
-from DrissionPage import ChromiumPage
-import json
-import csv
-import time
 
-# 保存为csv
-f = open('data.csv', mode='w', encoding='utf-8', newline='')
-csv_writer = csv.DictWriter(f, fieldnames=['标题', '发货地', '销售量', '店铺', '价格'])
-# 写入表头
-csv_writer.writeheader()
-# 打开浏览器
-driver = ChromiumPage()
-# 访问
-driver.get('https://www.taobao.com/')
-# 监听数据包→从网页中抓包，找到返回相应的网址，不要？后面的data包,记得url要截掉上面那个get的部分
-driver.listen.start('h5/mtop.relationrecommend')
-# 输入商品关键字
-driver.ele('css:#q').input('ws')
-# 进行搜索
-driver.ele('css:.btn-search').click()
-# 翻页
-for page in range(10):
-    # 设置延时
-    time.sleep(2)
-    # 滑动页面到最下方，使数据包加载
-    driver.scroll.to_bottom()
-    # 等待数据加载
-    resp = driver.listen.wait()
-    # 动态加载的话
-    text = resp.response.body
-    info = re.findall('mtopjsonp\d+\((.*)', text)[0].replace(')', '')
 
-    json_data = json.loads(info)
-    items = json_data['data']['itemsArray']
-    dits = []
+headers = {
+    "^accept": "*/*^",
+    "^accept-language": "zh-CN,zh;q=0.9^",
+    "^referer": "https://s.taobao.com/search?commend=all^&ie=utf8^&initiative_id=tbindexz_20170306^&page=1^&q=steam^%^E5^%^85^%^85^%^E5^%^80^%^BC^%^E5^%^8D^%^A1100^%^E7^%^BE^%^8E^%^E9^%^87^%^91^&search_type=item^&sourceId=tb.index^&spm=a21bo.jianhua^%^2Fa.201856.d13^&ssid=s5-e^&tab=all^",
+    "^sec-ch-ua": "^\\^Chromium^^;v=^\\^136^^, ^\\^Google",
+    "^sec-ch-ua-mobile": "?0^",
+    "^sec-ch-ua-platform": "^\\^Windows^^^",
+    "^sec-fetch-dest": "script^",
+    "^sec-fetch-mode": "no-cors^",
+    "^sec-fetch-site": "same-site^",
+    "^user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36^"
+}
+cookies = {
+    "^cookie2": "1c73cfac4db0c028b4804eeb253c42af",
+    "cancelledSubSites": "empty",
+    "tracknick": "tb9828473581",
+    "t": "2ddbe724a3b4d543c34020775b5148eb",
+    "lgc": "tb9828473581",
+    "wk_cookie2": "18e1f45a474c0e3476e892141605f677",
+    "wk_unb": "UUphwoXxKCNsnUkZCw^%^3D^%^3D",
+    "havana_lgc2_0": "eyJoaWQiOjIyMDgyNjM5MjM1NzEsInNnIjoiYjU1MWU1OTFjYzJiYmRjOTI5ZjFiYTljNjU5NzIwYjciLCJzaXRlIjowLCJ0b2tlbiI6IjFGdUJDSFJ6NVd6V2lRT0E3WG1QRy13In0",
+    "_hvn_lgc_": "0",
+    "sn": "",
+    "dnk": "tb9828473581",
+    "_tb_token_": "e59334eae7ee7",
+    "cna": "9Gi/HqkZLQ4CAXFftyTryaKX",
+    "tfstk": "gEGSapwkKgjWxZVdR8Y453hkEYFCVERNVwaKS2CPJ7F8vxgiAu8HE7kbAmnb2_8kEJEIq7enUkrzAWgnfE-w_CuorWqpbhRZR79BuWqpTWp4M37YOI-w_CukezVEkhle_TKbDP5L98edHsE08zId9DexkyEAwyC8JiLbmoCRyuU8kZULSzU-vWLjko4L9knLpEgxLAtboLZ-PUAHgfmemg8z26CKGzwJ34EA9rcbP8Ztyj1d9VU7Fl38DhmmBu2x-JGh-6Z-yAm3W0IJmkkZubebOdS3Avu-abNh-tgbdbk3dbYOjlM-lXNrVh63XYuYMuDJYTE-ZVPjp-TJwqN7Vcc-VCtxXRGrKJGkWGqseqGQabTFEzDxqSamTnf8AxHKa8Vh2nqEQql8h5Irz1rsf4BClRfQll8Xl9XH9EYngbZCu-w8orlwlEs5K8U0ll8Xl9X3er4bbETfK9f..",
+    "thw": "xx",
+    "_samesite_flag_": "true",
+    "3PcFlag": "1747109809722",
+    "sgcookie": "E100j9mJTRupcCpeIfxn^%^2BEcKyxfBeOtOvsPo6UuHdxVibl9HRyT7LXpL^%^2FbDaU^%^2FAsmpd0G73iqZMAeXHgBEsXhXvRbHxMQfBwoGzTnBIW0nC2myU^%^3D",
+    "havana_lgc_exp": "1778213809754",
+    "unb": "2208263923571",
+    "uc1": "cookie15=VFC^%^2FuZ9ayeYq2g^%^3D^%^3D^&cookie16=WqG3DMC9UpAPBHGz5QBErFxlCA^%^3D^%^3D^&cookie21=WqG3DMC9FxUx^&pas=0^&cookie14=UoYajLSVm1KVag^%^3D^%^3D^&existShop=false",
+    "uc3": "id2=UUphwoXxKCNsnUkZCw^%^3D^%^3D^&nk2=F5RMEYDYuuGXY9^%^2B0^&lg2=VFC^%^2FuZ9ayeYq2g^%^3D^%^3D^&vt3=F8dD2EXfKad0zoTJ^%^2Ba4^%^3D",
+    "csg": "b91690dd",
+    "cookie17": "UUphwoXxKCNsnUkZCw^%^3D^%^3D",
+    "skt": "6dca702d510ae22b",
+    "existShop": "MTc0NzEwOTgwOQ^%^3D^%^3D",
+    "uc4": "nk4=0^%^40FY4HVFvXl98cO3Z1j7Ym1FMs4^%^2BSJJsE^%^3D^&id4=0^%^40U2grGR1ikxRow5cg3lRfZesPV8ZCUTbP",
+    "_cc_": "WqG3DMC9EA^%^3D^%^3D",
+    "_l_g_": "Ug^%^3D^%^3D",
+    "sg": "116",
+    "_nk_": "tb9828473581",
+    "cookie1": "BqU^%^2FbJvAZZemLywtHwAiafCTKwJx0FfyVxW^%^2F8PJisZo^%^3D",
+    "havana_sdkSilent": "1747292002270",
+    "mtop_partitioned_detect": "1",
+    "_m_h5_tk": "fe7fbf3034d7d6306547033063624d4a_1747279515153",
+    "_m_h5_tk_enc": "2f5dc74111fdce8d2601bb8e8d1a6d13",
+    "sdkSilent": "1747359316566",
+    "isg": "BHl4nVv3NU2PrOfEca4z3lIviOVThm048mMSJZuUYajrIq-0etSpCD00pCbUngVw^"
+}
+url = "https://h5api.m.taobao.com/h5/mtop.relationrecommend.wirelessrecommend.recommend/2.0/?jsv=2.7.4&appKey=12574478&t=1747274102217&sign=2f1adb8ae994af27d9835bc92da00e24&api=mtop.relationrecommend.wirelessrecommend.recommend&v=2.0&timeout=10000&type=jsonp&dataType=jsonp&callback=mtopjsonp34&data=%7B%22appId%22%3A%2234385%22%2C%22params%22%3A%22%7B%5C%22device%5C%22%3A%5C%22HMA-AL00%5C%22%2C%5C%22isBeta%5C%22%3A%5C%22false%5C%22%2C%5C%22grayHair%5C%22%3A%5C%22false%5C%22%2C%5C%22from%5C%22%3A%5C%22nt_history%5C%22%2C%5C%22brand%5C%22%3A%5C%22HUAWEI%5C%22%2C%5C%22info%5C%22%3A%5C%22wifi%5C%22%2C%5C%22index%5C%22%3A%5C%224%5C%22%2C%5C%22rainbow%5C%22%3A%5C%22%5C%22%2C%5C%22schemaType%5C%22%3A%5C%22auction%5C%22%2C%5C%22elderHome%5C%22%3A%5C%22false%5C%22%2C%5C%22isEnterSrpSearch%5C%22%3A%5C%22true%5C%22%2C%5C%22newSearch%5C%22%3A%5C%22false%5C%22%2C%5C%22network%5C%22%3A%5C%22wifi%5C%22%2C%5C%22subtype%5C%22%3A%5C%22%5C%22%2C%5C%22hasPreposeFilter%5C%22%3A%5C%22false%5C%22%2C%5C%22prepositionVersion%5C%22%3A%5C%22v2%5C%22%2C%5C%22client_os%5C%22%3A%5C%22Android%5C%22%2C%5C%22gpsEnabled%5C%22%3A%5C%22false%5C%22%2C%5C%22searchDoorFrom%5C%22%3A%5C%22srp%5C%22%2C%5C%22debug_rerankNewOpenCard%5C%22%3A%5C%22false%5C%22%2C%5C%22homePageVersion%5C%22%3A%5C%22v7%5C%22%2C%5C%22searchElderHomeOpen%5C%22%3A%5C%22false%5C%22%2C%5C%22search_action%5C%22%3A%5C%22initiative%5C%22%2C%5C%22sugg%5C%22%3A%5C%22_4_1%5C%22%2C%5C%22sversion%5C%22%3A%5C%2213.6%5C%22%2C%5C%22style%5C%22%3A%5C%22list%5C%22%2C%5C%22ttid%5C%22%3A%5C%22600000%40taobao_pc_10.7.0%5C%22%2C%5C%22needTabs%5C%22%3A%5C%22true%5C%22%2C%5C%22areaCode%5C%22%3A%5C%22CN%5C%22%2C%5C%22vm%5C%22%3A%5C%22nw%5C%22%2C%5C%22countryNum%5C%22%3A%5C%22156%5C%22%2C%5C%22m%5C%22%3A%5C%22pc%5C%22%2C%5C%22page%5C%22%3A2%2C%5C%22n%5C%22%3A48%2C%5C%22q%5C%22%3A%5C%22steam%25E5%2585%2585%25E5%2580%25BC%25E5%258D%25A1100%25E7%25BE%258E%25E9%2587%2591%5C%22%2C%5C%22qSource%5C%22%3A%5C%22url%5C%22%2C%5C%22pageSource%5C%22%3A%5C%22a21bo.jianhua%2Fa.201856.d13%5C%22%2C%5C%22channelSrp%5C%22%3A%5C%22%5C%22%2C%5C%22tab%5C%22%3A%5C%22all%5C%22%2C%5C%22pageSize%5C%22%3A%5C%2248%5C%22%2C%5C%22totalPage%5C%22%3A%5C%2253%5C%22%2C%5C%22totalResults%5C%22%3A%5C%222497%5C%22%2C%5C%22sourceS%5C%22%3A%5C%220%5C%22%2C%5C%22sort%5C%22%3A%5C%22_coefp%5C%22%2C%5C%22bcoffset%5C%22%3A%5C%22-5%5C%22%2C%5C%22ntoffset%5C%22%3A%5C%2213%5C%22%2C%5C%22filterTag%5C%22%3A%5C%22%5C%22%2C%5C%22service%5C%22%3A%5C%22%5C%22%2C%5C%22prop%5C%22%3A%5C%22%5C%22%2C%5C%22loc%5C%22%3A%5C%22%5C%22%2C%5C%22start_price%5C%22%3Anull%2C%5C%22end_price%5C%22%3Anull%2C%5C%22startPrice%5C%22%3Anull%2C%5C%22endPrice%5C%22%3Anull%2C%5C%22categoryp%5C%22%3A%5C%22%5C%22%2C%5C%22ha3Kvpairs%5C%22%3Anull%2C%5C%22myCNA%5C%22%3A%5C%229Gi%2FHqkZLQ4CAXFftyTryaKX%5C%22%2C%5C%22screenResolution%5C%22%3A%5C%221536x864%5C%22%2C%5C%22userAgent%5C%22%3A%5C%22Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Chrome%2F136.0.0.0%20Safari%2F537.36%5C%22%2C%5C%22couponUnikey%5C%22%3A%5C%22%5C%22%7D%22%7D&bx-ua=231!FtD7bkmUsSE%2Bj8mEd473fzBjUGg0uSOn%2BfYFmLQQwGng0wmHntUSK%2B2ttWIwYfiRlXeQ%2BthKJXIvfegh2cGUuRIvbZ9fhRfZbrcyCwJp1Tn%2F1O6FZpQVRD06r2Mu8DxwArNmu%2FXtPls1cOfonXEo%2FhgBrgXdoMRN6g%2BVvaxctb4hZzQVHoyprLHXPCmCkrJJtKFlolt6WrYIoHmZDpAAQGa2dGOaYHlO7VwidGou3PQzMzLtlg5O3km%2B0Q3oyE%2BjauHhUHT6fSnGHkE%2B%2B%2B3%2BqCS4%2BItMZA2VejtGo%2Br%2B0N6L5qMnzf5ScgBDAStsd5Xvo5MExtkC7UE%2F9T8vDzndOmy2gn9%2B913DB%2FmlonwdX2EgJyMY202HCBmcOyUeDr9JEn6x4RjO%2Bjl9%2BGLbI2bIOmBaJoLukQqJYfa8zWX%2BqBARY3cyu1DMIyNmDLnkuZUplUlg3kcrqnOIrv4J3EvI50yQXra8L%2FTB3c4RhGldM0lauyM5Jae%2FrKq2aeI78ppqZKftBoLySPEXmPSY1EckQomloTbcePyl0jIiSpzhn3oibTycw7eOR7yo8n9Pthcy%2BncnenT26ZfrJvKZjBSLx6Z6LBhGDB6G2TJzY1oSq%2Bl3eLoivJo2caK%2B9ASuzJ9%2FhCvHrNaeDEbcItUNLM5R2Q1zqC29qwLVuoEdmc%2BvxBESXhJLH1RarhBuzDOFN9hfTrRY5lwv4uc9zzg9ZLZOjZI78TRP%2B6%2B7zyTuP%2BvKlYCzzPynH2FoQecrEWctxRB1rtKUrBP1aQk0%2BwI%2FV5VP%2BjCeuAnwNAJ%2FcSsgaeY%2FORrywAALRZdFy33Dvh7PpZz00h%2B3%2F1uOc1rloe0gJIWebqzbhU3fsg6%2FXlzr5lYdiWI647KjcflD7GJo6%2Fwt70u9USXuyK%2Fd%2Fc6Z7kH%2FaLPrAJlq%2Bugsq8ueW%2FvZ6FcrpSnN2e%2FH0n8jzeV6rUXqur5Rx6G%2FYaqCNL9z3HetUc63M0G%2BjPb7OfqqNlcsMzJCOutqQzOft22Ao8sR80eYdNIaIwKfFYeaYLvGhQt%2BME7T8QJBOWDoUJ2eD9lnPNih4QzsiR%2FPbb5yRy2y%2BSTxJQve5zWN45%2F8XQW1cmGHeWE%2FOThD3mv9v8mXgX7%2BGXOCkzLeNFwFvm9v8n%2BoQSPvGcQIxCEsQxnF%2BZp6Z1SMcVcYO4H9kHim6FBdM81%2Fp3zhecOtX9xCYBM0Yco1oinrz%2Fkmupi5bVarA%2FGApfL10nudTCYzJjyQjtrRFK2EgUODVYfo3nQk%2BuE7Yqgl4yjs%2F3yw%2FCiIDCC%2BCJPmtjWfoI3o6w2ga2wYr7QpbEMJZyBjLZMD7e6%2F3Ptbu7AhwtPzu%2BP4CJ1GhIvssN9QhpNIHKn4wO1KdVM2wcV0TXh3JqaYaN%2BZnpSJoJpldTnzvO54G1O8i5ie7siBlvD464EBY4QWqHfftAkmznvPUP4228u%2BqPJRJwSIlpWoa6OALeILS1TOktnmbvJcFbgfDwAH3A1YOAm5z54r66hDeKkQeSDNPb9MTFAsIuceWH00P89yH4deRP2co9ERKF56noLPhlM4FWTOA%2Bf%2BCx3eScCim42UiPD8D2vulGzT%2FGSSR5dDLBl1TVdD9Y3%2FnV6d1bFVHRBzsBwFgupFmvPpDV8x6BlwqK6DD4sUiEQhuwBE1HCLEIgQ82LpMShAeJW8QpXscm4H6YPd4doW8NBcWXpWKT94R7xDN40GQGuASvQZU5GMsSFEz70iG3GfdcsmefVUasJwIvUVXZ%2FnzqLWGNYXGlPX6kbnCTIDTMXCoTWthOXvns6DmABtg8UJ4tUnXnlRHDVyBepJfaT6z54Bh%2B%2B%2FYS4pxyTLvl3Y%2BqG%3D&bx-umidtoken=T2gAr-RSZyK_ZCoyHWom11FTfJE6AVPgZQ62cA_B7I7MEbocUZxeD0e_dX9VgmHagm0%3D&bx_et=default_not_fun"
+params = {
+    "jsv": "2.7.4^",
+    "appKey": "12574478^",
+    "t": "1747273862149^",
+    "sign": "cf34f28b1f8a8589450b5028f702fe15^",
+    "api": "mtop.relationrecommend.wirelessrecommend.recommend^",
+    "v": "2.0^",
+    "timeout": "10000^",
+    "type": "jsonp^",
+    "dataType": "jsonp^",
+    "callback": "mtopjsonp190^",
+    "data": "^%^7B^%^22appId^%^22^%^3A^%^2234385^%^22^%^2C^%^22params^%^22^%^3A^%^22^%^7B^%^5C^%^22device^%^5C^%^22^%^3A^%^5C^%^22HMA-AL00^%^5C^%^22^%^2C^%^5C^%^22isBeta^%^5C^%^22^%^3A^%^5C^%^22false^%^5C^%^22^%^2C^%^5C^%^22grayHair^%^5C^%^22^%^3A^%^5C^%^22false^%^5C^%^22^%^2C^%^5C^%^22from^%^5C^%^22^%^3A^%^5C^%^22nt_history^%^5C^%^22^%^2C^%^5C^%^22brand^%^5C^%^22^%^3A^%^5C^%^22HUAWEI^%^5C^%^22^%^2C^%^5C^%^22info^%^5C^%^22^%^3A^%^5C^%^22wifi^%^5C^%^22^%^2C^%^5C^%^22index^%^5C^%^22^%^3A^%^5C^%^224^%^5C^%^22^%^2C^%^5C^%^22rainbow^%^5C^%^22^%^3A^%^5C^%^22^%^5C^%^22^%^2C^%^5C^%^22schemaType^%^5C^%^22^%^3A^%^5C^%^22auction^%^5C^%^22^%^2C^%^5C^%^22elderHome^%^5C^%^22^%^3A^%^5C^%^22false^%^5C^%^22^%^2C^%^5C^%^22isEnterSrpSearch^%^5C^%^22^%^3A^%^5C^%^22true^%^5C^%^22^%^2C^%^5C^%^22newSearch^%^5C^%^22^%^3A^%^5C^%^22false^%^5C^%^22^%^2C^%^5C^%^22network^%^5C^%^22^%^3A^%^5C^%^22wifi^%^5C^%^22^%^2C^%^5C^%^22subtype^%^5C^%^22^%^3A^%^5C^%^22^%^5C^%^22^%^2C^%^5C^%^22hasPreposeFilter^%^5C^%^22^%^3A^%^5C^%^22false^%^5C^%^22^%^2C^%^5C^%^22prepositionVersion^%^5C^%^22^%^3A^%^5C^%^22v2^%^5C^%^22^%^2C^%^5C^%^22client_os^%^5C^%^22^%^3A^%^5C^%^22Android^%^5C^%^22^%^2C^%^5C^%^22gpsEnabled^%^5C^%^22^%^3A^%^5C^%^22false^%^5C^%^22^%^2C^%^5C^%^22searchDoorFrom^%^5C^%^22^%^3A^%^5C^%^22srp^%^5C^%^22^%^2C^%^5C^%^22debug_rerankNewOpenCard^%^5C^%^22^%^3A^%^5C^%^22false^%^5C^%^22^%^2C^%^5C^%^22homePageVersion^%^5C^%^22^%^3A^%^5C^%^22v7^%^5C^%^22^%^2C^%^5C^%^22searchElderHomeOpen^%^5C^%^22^%^3A^%^5C^%^22false^%^5C^%^22^%^2C^%^5C^%^22search_action^%^5C^%^22^%^3A^%^5C^%^22initiative^%^5C^%^22^%^2C^%^5C^%^22sugg^%^5C^%^22^%^3A^%^5C^%^22_4_1^%^5C^%^22^%^2C^%^5C^%^22sversion^%^5C^%^22^%^3A^%^5C^%^2213.6^%^5C^%^22^%^2C^%^5C^%^22style^%^5C^%^22^%^3A^%^5C^%^22list^%^5C^%^22^%^2C^%^5C^%^22ttid^%^5C^%^22^%^3A^%^5C^%^22600000^%^40taobao_pc_10.7.0^%^5C^%^22^%^2C^%^5C^%^22needTabs^%^5C^%^22^%^3A^%^5C^%^22true^%^5C^%^22^%^2C^%^5C^%^22areaCode^%^5C^%^22^%^3A^%^5C^%^22CN^%^5C^%^22^%^2C^%^5C^%^22vm^%^5C^%^22^%^3A^%^5C^%^22nw^%^5C^%^22^%^2C^%^5C^%^22countryNum^%^5C^%^22^%^3A^%^5C^%^22156^%^5C^%^22^%^2C^%^5C^%^22m^%^5C^%^22^%^3A^%^5C^%^22pc^%^5C^%^22^%^2C^%^5C^%^22page^%^5C^%^22^%^3A2^%^2C^%^5C^%^22n^%^5C^%^22^%^3A48^%^2C^%^5C^%^22q^%^5C^%^22^%^3A^%^5C^%^22steam^%^25E5^%^2585^%^2585^%^25E5^%^2580^%^25BC^%^25E5^%^258D^%^25A1100^%^25E7^%^25BE^%^258E^%^25E9^%^2587^%^2591^%^5C^%^22^%^2C^%^5C^%^22qSource^%^5C^%^22^%^3A^%^5C^%^22manual^%^5C^%^22^%^2C^%^5C^%^22pageSource^%^5C^%^22^%^3A^%^5C^%^22a21bo.jianhua^%^2Fa.201856.d13^%^5C^%^22^%^2C^%^5C^%^22channelSrp^%^5C^%^22^%^3A^%^5C^%^22^%^5C^%^22^%^2C^%^5C^%^22tab^%^5C^%^22^%^3A^%^5C^%^22all^%^5C^%^22^%^2C^%^5C^%^22pageSize^%^5C^%^22^%^3A^%^5C^%^2248^%^5C^%^22^%^2C^%^5C^%^22totalPage^%^5C^%^22^%^3A^%^5C^%^225^%^5C^%^22^%^2C^%^5C^%^22totalResults^%^5C^%^22^%^3A^%^5C^%^22195^%^5C^%^22^%^2C^%^5C^%^22sourceS^%^5C^%^22^%^3A^%^5C^%^220^%^5C^%^22^%^2C^%^5C^%^22sort^%^5C^%^22^%^3A^%^5C^%^22_coefp^%^5C^%^22^%^2C^%^5C^%^22bcoffset^%^5C^%^22^%^3A^%^5C^%^22-1^%^5C^%^22^%^2C^%^5C^%^22ntoffset^%^5C^%^22^%^3A^%^5C^%^2211^%^5C^%^22^%^2C^%^5C^%^22filterTag^%^5C^%^22^%^3A^%^5C^%^22^%^5C^%^22^%^2C^%^5C^%^22service^%^5C^%^22^%^3A^%^5C^%^22^%^5C^%^22^%^2C^%^5C^%^22prop^%^5C^%^22^%^3A^%^5C^%^22^%^5C^%^22^%^2C^%^5C^%^22loc^%^5C^%^22^%^3A^%^5C^%^22^%^5C^%^22^%^2C^%^5C^%^22start_price^%^5C^%^22^%^3A^%^5C^%^22500^%^5C^%^22^%^2C^%^5C^%^22end_price^%^5C^%^22^%^3A^%^5C^%^22900^%^5C^%^22^%^2C^%^5C^%^22startPrice^%^5C^%^22^%^3A^%^5C^%^22500^%^5C^%^22^%^2C^%^5C^%^22endPrice^%^5C^%^22^%^3A^%^5C^%^22900^%^5C^%^22^%^2C^%^5C^%^22categoryp^%^5C^%^22^%^3A^%^5C^%^22^%^5C^%^22^%^2C^%^5C^%^22ha3Kvpairs^%^5C^%^22^%^3Anull^%^2C^%^5C^%^22myCNA^%^5C^%^22^%^3A^%^5C^%^229Gi^%^2FHqkZLQ4CAXFftyTryaKX^%^5C^%^22^%^2C^%^5C^%^22screenResolution^%^5C^%^22^%^3A^%^5C^%^221536x864^%^5C^%^22^%^2C^%^5C^%^22userAgent^%^5C^%^22^%^3A^%^5C^%^22Mozilla^%^2F5.0^%^20(Windows^%^20NT^%^2010.0^%^3B^%^20Win64^%^3B^%^20x64)^%^20AppleWebKit^%^2F537.36^%^20(KHTML^%^2C^%^20like^%^20Gecko)^%^20Chrome^%^2F136.0.0.0^%^20Safari^%^2F537.36^%^5C^%^22^%^2C^%^5C^%^22couponUnikey^%^5C^%^22^%^3A^%^5C^%^22^%^5C^%^22^%^7D^%^22^%^7D^",
+    "bx-ua": "231^!ODB8u4mUn^%^2Bv^%^2Bj^%^2FZvd473fzBjUGg0uSOn^%^2BfYFmLQQwGng0wmHntUSK^%^2B2ttWIwYfiRlXeQ^%^2BthKJXIvfegh2cGUuRIvbZ9fhRfZbrcyCwJp1Tn^%^2F1O6FZpQVRD06r2Mu8DxwArNmu^%^2FXtPls1cOfonXEo^%^2FhgBrgXdoMRN6g^%^2BVvaxctb4hZzQVHoyprLHXPCmCkrJJtKFlolt6WrYIoHmZDpAAQGa2dGOaYHlO7VwidGou3PQzMzLtlg5O3km^%^2B0Q3oyE^%^2BjauHhUHT6fSnGHkE^%^2B^%^2B^%^2B3^%^2BqCS4^%^2BItMqkXjP7cqo^%^2Br^%^2B0N6L5qMnzf5ScgBDAStsd5Xvo5Os3RuuXcOWmOYIevMXvs2qdxSndi5B6F6ekyYoxoZDgTEmxIdxJA^%^2FNf8LF5oU40lO7WAPeXEbOE9KbdwDZGNsCejfmZbcApHdT0Iq8aSAvXG0Wz65fal^%^2FTgfjZOZDIhKF6hKajQDNybpArW6ccdkpk6IUpNplOfbmuZdw8OX3SbcV04AeDf3EE6eAfyU40Va0hLXYyWRGO^%^2Fzqno8U0thfZ1Ja84MU^%^2BYO3n0TikdAlMpFwQgErJYB7sC7KDyeAb5zdVrDBdRtw5ymHJEl9yzpzfSjRpWpxiQ5pDjx7uzB2mu5zITubogY1Wyqs2az7ooMVspIaYhzdrdYNMCbaq6V^%^2BPOShAbQpXT67lUIcXfoye1NvyoD10GU9Lfu8jiY4vjdOgrx6ARsf0^%^2B9Q5^%^2F6qogfF7r20i2IIU8nyTPz4c9gqH4xc^%^2Br5xfXKkSa7M1K7vDdQxGyrEXEaKDDkOBb09gvIMCR5H^%^2BIIT1NO9IKGHitIzyu^%^2Bg00eTpBS3igR^%^2B16xtqMpymKcZuolFVAGHxe6iCO6tlmg2At6q0tGs^%^2BMN4JXnOaQFujMU^%^2FAPOcoYjTSjXRPvzwYWC0eQ4aaKGIviXQjX00d24lWhJwUgvpdIrWydkmVG2ocKiT3T^%^2F2DByJGJhpK67thTCOVS2CrhWk39MhsqEBTZnRjtGggcq^%^2FB8Y7kCj2XRGIFbr^%^2BX2VeynBAD9y6hfvqmqCUPq6Ho3KpawG2iY^%^2BvGWAg1qpwJ^%^2FQsx2MIjBX0vfT71hIZQ5vxTiy8BNofepX61eKcJKKDKtENcmk^%^2FKSSwC2asNYgNz^%^2BeXuaxByY^%^2FOy2rcEH5dUGAPshHMprBPjNrH7WpKk5mCSYW3SYV8hOOuxRad6uBDly^%^2FFwIXQiZL^%^2F6L02SkIQAYpfDQW6Dhautr4KtJ73KLw3vqRmrEgzmu2jMUGt4tsd1Be^%^2BZvvZmNrYsb1VAaU6Nv1NVsW26W3TsWa4x9BQR1lm^%^2FNmsUnT5GGVY9lJUfs73PqwMQOMrcDFo7UZpTfCDS2bmFBnm3BGsivFg4dP0X^%^2F9V90yqMKZMqHmBwQ4RKbJ8ZV1GF8k^%^2BDoNqDK5njz^%^2Bi8gLTJ4GPOo9odO331J^%^2BljTqviHYFDf7SsBfmuo614nOIykQHQJ7^%^2B8vaq2g^%^2B96UwlxsNgHFvzDxv4U^%^2Bm9yadDfP7eSacX^%^2BDbZ^%^2FoZjeqU1O0KIt9MXaUGv6xEsosmgzVmyvDzaW^%^2B5XT6zNHGvfTC4I2leQ9Z3hXDlkYz10wCccmDcDb8oqtcASit7GlicyIUCbP8MsBVC5YWUxbmhSUuIZox^%^2BEexuuw4eTVikBGNnvl3tpF12nTWN^%^2FbX4vMP2q^%^2BT784WGcczOCB3PI0li3GwIncTz^%^2ByA66syHumrR16Uqshf2BagFpJkH6J65D^%^2FYGdmAfuemUynMyTdSYvjgHfGgv^%^2BSuJt6cMhdiaxrkwHQNQc0OmVmKEkH^%^2F66cZP81RpRQO0i^%^2BY5IliA^%^2FJAeo7O1SoY7AGypHtbb0bIW85^%^2BoGIChSVfrGuUqoPG^%^2BCEMCqKlSFy8CUTRXiG1VATu8SmcjKopVGT7dS^%^2FALg0M88gCr^%^2BCRcawF83xxGivnffYIZphZvizWQOEjU4qRVq0x5OyY3ptiycTz0Tq75UQSqfPLe38pMlbwOXohI41QVOlNaHko4FY4nWjlscVmJhOItn9UaxtwoaKsuoXICos^%^2F8wwaYVSPWwadyxHdcnQe5wxRnaUCPWbXwrlJZW6bO7O^%^2F4MRfDVLDv9HVSELO^%^2BIiDB1CQ2zJVH3nvNEKwYSs8hl^%^2F^%^2BdF8tHhNP68o88E2u4l2T2USsKgbP3KtAZ0KwJhffd9wnpRootXOQXU5MT3^%^2Fga^%^2Bm1NORwaNVtBHPkBfnWMF^%^2FOoos65^%^2FNqBA5hYd5my3mX6YL53BYuZYcuLNTc^%^2B1CMiOW2ZqdAwQ81kOSOXvpsfAL1^%^2FU9^%^2F4SvpBXT6k6jakmYxMbNsFdozCDTEz^%^2BZKWvcclNujytwRWi118qv^%^2FnhfVJMtwrjwkA^%^3D^%^3D^",
+    "bx-umidtoken": "T2gAr-RSZyK_ZCoyHWom11FTfJE6AVPgZQ62cA_B7I7MEbocUZxeD0e_dX9VgmHagm0^%^3D^",
+    "bx_et": "default_not_fun^"
+}
+response = requests.get(url, headers=headers, cookies=cookies, params=params)
 
-    for item in items:
-        dit = {
-            '标题': item['title'],
-            '发货地': item['procity'],
-            '销售量': item['realSales'],
-            '店铺': item['shopInfo']['title'],
-            '价格': item['priceShow']['price'],
-        }
-        dits.append(dit)
-        csv_writer.writerow(dit)
-    driver.ele('css:.next-next').click()
-    # 写入数据
+print(response.text)
+print(response)
